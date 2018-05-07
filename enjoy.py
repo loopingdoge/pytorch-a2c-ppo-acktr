@@ -64,7 +64,7 @@ def update_current_obs(obs):
     current_obs[:, -shape_dim0:] = obs
 
 
-render_func('human')
+# render_func('human')
 obs = env.reset()
 update_current_obs(obs)
 
@@ -101,4 +101,5 @@ while True:
             humanPos, humanOrn = p.getBasePositionAndOrientation(torsoId)
             p.resetDebugVisualizerCamera(distance, yaw, -20, humanPos)
 
-    render_func('human')
+    # render_func('human')
+    env.envs[0].render()
