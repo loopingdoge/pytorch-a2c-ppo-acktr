@@ -64,8 +64,8 @@ def update_current_obs(obs):
     current_obs[:, -shape_dim0:] = obs
 
 
-# render_func('human')
 obs = env.reset()
+render_func('human')
 update_current_obs(obs)
 
 if args.env_name.find('Bullet') > -1:
@@ -101,5 +101,4 @@ while True:
             humanPos, humanOrn = p.getBasePositionAndOrientation(torsoId)
             p.resetDebugVisualizerCamera(distance, yaw, -20, humanPos)
 
-    # render_func('human')
-    env.envs[0].render()
+    render_func('human')
