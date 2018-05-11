@@ -1,3 +1,7 @@
+# It's dangerous to run alone, take these
+- `python main.py --env-name "Sonic-v02" --algo acktr --num-processes 32 --num-steps 20`
+- `python enjoy.py --load-dir trained_models/acktr --env-name "Sonic-v02" --num-stack 4`
+
 # pytorch-a2c-ppo-acktr
 
 ## Update 10/06/2017: added enjoy.py and a link to pretrained models!
@@ -168,3 +172,4 @@ python enjoy.py --load-dir trained_models/ppo --env-name "Reacher-v1" --num-stac
 ![QbertNoFrameskip-v4](imgs/acktr_qbert.png)
 
 ![beamriderNoFrameskip-v4](imgs/acktr_beamrider.png)
+
