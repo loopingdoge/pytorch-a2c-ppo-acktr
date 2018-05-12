@@ -1,7 +1,5 @@
 from agents import Agents
-
-
-from arguments import get_args
+from agents.arguments import get_args
 
 def main():
     args = get_args()

@@ -13,12 +13,12 @@ import torch.optim as optim
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
-from envs import make_env
-from model import Policy
-from storage import RolloutStorage
-from visualize import visdom_plot
+from .envs import make_env
+from .model import Policy
+from .storage import RolloutStorage
+from .visualize import visdom_plot
 
-import algo
+import agents.algo as algo
 
 class Agents:
     envs = None

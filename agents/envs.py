@@ -7,7 +7,7 @@ from gym.spaces.box import Box
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
 
-from sonic_util import make_sonic_env, AllowBacktracking
+from .sonic_util import make_sonic_env, AllowBacktracking
 
 try:
     import dm_control2gym
