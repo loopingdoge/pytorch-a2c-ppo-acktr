@@ -20,7 +20,7 @@ from visualize import visdom_plot
 
 import algo
 
-class ACKTR:
+class Agents:
     envs = None
 
     def __init__(self, args):
