@@ -4,17 +4,68 @@ from agents import Agents
 from agents.arguments import get_args
 from copy import deepcopy
 
+train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
+             ("SonicTheHedgehog-Genesis", "SpringYardZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "GreenHillZone.Act3"),
+             ("SonicTheHedgehog-Genesis", "GreenHillZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "StarLightZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "StarLightZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "MarbleZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "MarbleZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "MarbleZone.Act3"),
+             ("SonicTheHedgehog-Genesis", "ScrapBrainZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "LabyrinthZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "LabyrinthZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "LabyrinthZone.Act3"),
+             ("SonicTheHedgehog2-Genesis", "EmeraldHillZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "EmeraldHillZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "ChemicalPlantZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "ChemicalPlantZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "OilOceanZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "OilOceanZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "MysticCaveZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "MysticCaveZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "HillTopZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "CasinoNightZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "WingFortressZone"),
+             ("SonicTheHedgehog2-Genesis", "AquaticRuinZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "AquaticRuinZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "LavaReefZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "CarnivalNightZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "CarnivalNightZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "MarbleGardenZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "MarbleGardenZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "MushroomHillZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "MushroomHillZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "DeathEggZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "DeathEggZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "FlyingBatteryZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "SandopolisZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "SandopolisZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "HiddenPalaceZone"),
+             ("SonicAndKnuckles3-Genesis", "HydrocityZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "IcecapZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "IcecapZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "AngelIslandZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act1")]
 
-def multiple_agents(n_agents):
+
+def multiple_agents():
     args = get_args()
 
     num_updates = int(args.num_frames) // args.num_steps // args.num_processes
 
-    agents = [Agents(args) for i in range(n_agents)]
+    agents = []
+    for i in range(len(train_set)):
+        game, level = train_set[i]
+        agents.append(Agents(args, game, level))
 
     for a in agents:
         a.init_training()
-    
+
     start = time.time()
 
     for j in range(num_updates):
@@ -43,4 +94,4 @@ def multiple_agents(n_agents):
 
 
 if __name__ == "__main__":
-    multiple_agents(3)
+    multiple_agents()

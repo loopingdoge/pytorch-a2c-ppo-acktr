@@ -23,7 +23,7 @@ import agents.algo as algo
 class Agents:
     envs = None
 
-    def __init__(self, args):
+    def __init__(self, args, game, level):
         self.args = args
 
         assert self.args.algo in ['a2c', 'ppo', 'acktr']
@@ -49,7 +49,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep)
+        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, game, level)
                     for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:
