@@ -33,7 +33,6 @@ opencv-python==3.4.0.12
 Pillow==5.1.0
 progressbar2==3.37.1
 protobuf==3.5.2.post1
-pybullet==1.9.7
 pycparser==2.18
 pyglet==1.3.2
 PyOpenGL==3.1.0
@@ -56,7 +55,7 @@ torchvision==0.2.1
 tornado==5.0.2
 tqdm==4.23.3
 urllib3==1.22
-visdom==0.1.7
+visdom==0.1.8.1
 websocket-client==0.47.0
 Werkzeug==0.14.1
 zmq==0.0.0

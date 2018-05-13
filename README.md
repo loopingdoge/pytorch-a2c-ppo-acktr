@@ -2,6 +2,11 @@
 - `python main.py --env-name "Sonic-v02" --algo acktr --num-processes 32 --num-steps 20`
 - `python enjoy.py --load-dir trained_models/acktr --env-name "Sonic-v02" --num-stack 4`
 
+## Dockerize
+1. Run `docker build -f retro-env.docker -t retro-env .` to create a docker image with all the dependencies needed
+2. Run `docker build -f aktr.docker -t $DOCKER_REGISTRY/aktr:test .` to create the docker image
+3. Test it with `retro-contest run --agent $DOCKER_REGISTRY/aktr:test --results-dir results --no-nv --use-host-data SonicTheHedgehog-Genesis GreenHillZone.Act1`
+
 # pytorch-a2c-ppo-acktr
 
 ## Update 10/06/2017: added enjoy.py and a link to pretrained models!
