@@ -38,7 +38,7 @@ def make_env(env_id, seed, rank, log_dir, add_timestep):
             env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
         if is_atari:
             env = make_atari(env_id)
-        env.seed(seed + rank)
+        # env.seed(seed + rank)
 
         obs_shape = env.observation_space.shape
         if add_timestep and len(

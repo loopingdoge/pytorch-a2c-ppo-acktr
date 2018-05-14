@@ -2,6 +2,7 @@ import copy
 import glob
 import os
 import time
+import sys
 
 import gym
 import numpy as np
@@ -52,10 +53,14 @@ class Agents:
         self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep)
                     for i in range(self.args.num_processes)]
 
+        print("wewe")
+
         if self.args.num_processes > 1:
             self.envs = SubprocVecEnv(self.envs)
         else:
             self.envs = DummyVecEnv(self.envs)
+
+        print("we")
 
         if len(self.envs.observation_space.shape) == 1:
             self.envs = VecNormalize(self.envs)
@@ -63,7 +68,8 @@ class Agents:
         obs_shape = self.envs.observation_space.shape
         obs_shape = (obs_shape[0] * self.args.num_stack, *obs_shape[1:])
 
-        self.actor_critic = Policy(obs_shape, self.envs.action_space, self.args.recurrent_policy)
+        # self.actor_critic = Policy(obs_shape, self.envs.action_space, self.args.recurrent_policy)
+        self.actor_critic, _ = torch.load(os.path.join("./trained_models/acktr", self.args.env_name + ".pt"))
 
         if self.envs.action_space.__class__.__name__ == "Discrete":
             action_shape = 1
@@ -101,7 +107,7 @@ class Agents:
         print("#######")
         print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
         print("#######")
-
+        sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
         self.rollouts.observations[0].copy_(self.current_obs)
@@ -175,6 +181,7 @@ class Agents:
                         final_rewards.min(),
                         final_rewards.max(), dist_entropy,
                         value_loss, action_loss))
+                sys.stdout.flush()
             if self.args.vis and j % self.args.vis_interval == 0:
                 try:
                     # Sometimes monitor doesn't properly flush the outputs

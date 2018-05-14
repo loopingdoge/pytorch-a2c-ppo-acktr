@@ -5,4 +5,4 @@ RUN . ~/venv/bin/activate
 ADD main.py ./agent.py
 ADD agents/ agents/
 
-CMD ["python", "--version"]
+CMD ["python", "agent.py", "--algo", "acktr", "--num-steps", "20", "--num-processes", "1", "--no-vis", "--env-name", "Sonic-v0"]

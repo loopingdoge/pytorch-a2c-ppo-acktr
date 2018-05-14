@@ -7,7 +7,7 @@ import numpy as np
 
 from retro_contest.local import make
 from baselines.common.atari_wrappers import WarpFrame, FrameStack
-# import gym_remote.client as grc
+import gym_remote.client as grc
 
 def make_sonic_env(stack=False, scale_rew=True):
     """
