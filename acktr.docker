@@ -1,4 +1,4 @@
-FROM retro-env
+FROM retrocontestnwohsybxfvjqdtkl.azurecr.io/retro-env:v1
 
 RUN . ~/venv/bin/activate
 
