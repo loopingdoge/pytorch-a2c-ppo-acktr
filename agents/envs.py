@@ -25,13 +25,13 @@ except ImportError:
     pass
 
 
-def make_env(env_id, seed, rank, log_dir, add_timestep):
+def make_env(env_id, seed, rank, log_dir, add_timestep, remote_env):
     def _thunk():
         if env_id.startswith("dm"):
             _, domain, task = env_id.split('.')
             env = dm_control2gym.make(domain_name=domain, task_name=task)
         elif env_id.startswith("Sonic"):
-            env = AllowBacktracking(make_sonic_env())
+            env = AllowBacktracking(make_sonic_env(remote_env))
         else:
             env = gym.make(env_id)
         is_atari = hasattr(gym.envs, 'atari') and isinstance(

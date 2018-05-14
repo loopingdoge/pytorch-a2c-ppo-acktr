@@ -1,8 +1,0 @@
-FROM retro-env
-
-RUN . ~/venv/bin/activate
-
-ADD main.py ./agent.py
-ADD agents/ agents/
-
-CMD ["python", "--version"]

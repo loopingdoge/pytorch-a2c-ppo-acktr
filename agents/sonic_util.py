@@ -7,14 +7,16 @@ import numpy as np
 
 from retro_contest.local import make
 from baselines.common.atari_wrappers import WarpFrame, FrameStack
-# import gym_remote.client as grc
+import gym_remote.client as grc
 
-def make_sonic_env(stack=False, scale_rew=True):
+def make_sonic_env(remote_env, stack=False, scale_rew=True):
     """
     Create an environment with some standard wrappers.
     """
-    # env = grc.RemoteEnv('tmp/sock')
-    env = make(game='SonicTheHedgehog-Genesis', state='GreenHillZone.Act1')
+    if remote_env:
+        env = grc.RemoteEnv('tmp/sock')
+    else:
+        env = make(game='SonicTheHedgehog-Genesis', state='GreenHillZone.Act1')
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)

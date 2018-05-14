@@ -2,6 +2,7 @@ import copy
 import glob
 import os
 import time
+import sys
 
 import gym
 import numpy as np
@@ -49,7 +50,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep)
+        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env)
                     for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:
@@ -101,6 +102,7 @@ class Agents:
         print("#######")
         print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
         print("#######")
+        sys.stdout.flush()
 
         obs = self.envs.reset()
         self.update_current_obs(obs)
@@ -175,6 +177,7 @@ class Agents:
                         final_rewards.min(),
                         final_rewards.max(), dist_entropy,
                         value_loss, action_loss))
+                sys.stdout.flush()
             if self.args.vis and j % self.args.vis_interval == 0:
                 try:
                     # Sometimes monitor doesn't properly flush the outputs
