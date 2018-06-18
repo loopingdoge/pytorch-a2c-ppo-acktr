@@ -118,6 +118,14 @@ class Agents:
             self.current_obs = self.current_obs.cuda()
             self.rollouts.cuda()
 
+        saved_state_path = os.path.join(
+            "./trained_models/acktr", self.args.env_name + ".pt")
+
+        if os.path.exists(saved_state_path):
+            saved_state = torch.load(saved_state_path)
+            self.actor_critic.load_state_dict(saved_state['state_dict'])
+            self.agent.optimizer.load_state_dict(saved_state['optimizer'])
+
     def compute_steps(self):
         for step in range(self.args.num_steps):
             # Sample actions
@@ -175,15 +183,11 @@ class Agents:
         except OSError:
             pass
 
-        # A really ugly way to save a model to CPU
-        save_model = self.actor_critic
-        if self.args.cuda:
-            save_model = copy.deepcopy(self.actor_critic).cpu()
-
-        save_model = [save_model,
-                      hasattr(self.envs, 'ob_rms') and self.envs.ob_rms or None]
-
-        torch.save(save_model, os.path.join(
+        state = {
+            'state_dict': self.actor_critic.state_dict(),
+            'optimizer': self.agent.optimizer.state_dict()
+        }
+        torch.save(state, os.path.join(
             save_path, self.args.env_name + ".pt"))
 
     def print_progress(self, start, curr):
