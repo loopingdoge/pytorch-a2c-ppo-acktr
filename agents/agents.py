@@ -69,9 +69,8 @@ class Agents:
         obs_shape = self.envs.observation_space.shape
         obs_shape = (obs_shape[0] * self.args.num_stack, *obs_shape[1:])
 
-        # self.actor_critic = Policy(obs_shape, self.envs.action_space, self.args.recurrent_policy)
-        self.actor_critic, _ = torch.load(os.path.join(
-            "./trained_models/acktr", self.args.env_name + ".pt"))
+        self.actor_critic = Policy(
+            obs_shape, self.envs.action_space, self.args.recurrent_policy)
 
         if self.envs.action_space.__class__.__name__ == "Discrete":
             action_shape = 1
