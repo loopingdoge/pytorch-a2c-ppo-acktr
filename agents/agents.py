@@ -124,11 +124,13 @@ class Agents:
         num_updates = int(
             self.args.num_frames) // self.args.num_steps // self.args.num_processes
 
-        saved_filepath = os.path.join(
+        saved_state_path = os.path.join(
             "./trained_models/acktr", self.args.env_name + ".pt")
 
-        if os.path.exists(saved_filepath):
-            self.actor_critic.load_state_dict(torch.load(saved_filepath))
+        if os.path.exists(saved_state_path):
+            saved_state = torch.load(saved_state_path)
+            self.actor_critic.load_state_dict(saved_state['state_dict'])
+            self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
         for j in range(num_updates):
             for step in range(self.args.num_steps):
@@ -217,5 +219,9 @@ class Agents:
         # save_model = [save_model,
         #                 hasattr(self.envs, 'ob_rms') and self.envs.ob_rms or None]
 
-        torch.save(self.actor_critic.state_dict(), os.path.join(
+        state = {
+            'state_dict': self.actor_critic.state_dict(),
+            'optimizer': self.agent.optimizer.state_dict()
+        }
+        torch.save(state, os.path.join(
             save_path, self.args.env_name + ".pt"))
