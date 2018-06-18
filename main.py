@@ -53,14 +53,16 @@ train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
              ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act1")]
 
 
-def multiple_agents():
+def multiple_agents(train_set):
     args = get_args()
 
     num_updates = int(args.num_frames) // args.num_steps // args.num_processes
 
+    train_subset = train_set[:3]
+
     agents = []
-    for i in range(len(train_set)):
-        game, level = train_set[i]
+    for i in range(len(train_subset)):
+        game, level = train_subset[i]
         agents.append(Agents(args, game, level))
 
     for a in agents:
@@ -78,7 +80,8 @@ def multiple_agents():
 
         params_average = deepcopy(params_sum)
         for name, param in params_sum.items():
-            params_average[name].data.copy_(params_sum[name].data * 0.5)
+            params_average[name].data.copy_(
+                params_sum[name].data * (1/len(train_subset)))
 
         for a in agents:
             a.substitute_params(params_average)
@@ -94,4 +97,4 @@ def multiple_agents():
 
 
 if __name__ == "__main__":
-    multiple_agents()
+    multiple_agents(train_set)
