@@ -1,0 +1,8 @@
+FROM retrocontestnwohsybxfvjqdtkl.azurecr.io/retro-env:v1
+
+RUN . ~/venv/bin/activate
+
+ADD main.py ./agent.py
+ADD agents/ agents/
+
+CMD ["python", "agent.py", "--algo", "acktr", "--num-processes", "1", "--num-steps", "20", "--remote-env","--env-name", "Sonic-v02"]
