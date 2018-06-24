@@ -54,14 +54,10 @@ class Agents:
         self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env)
                      for i in range(self.args.num_processes)]
 
-        print("wewe")
-
         if self.args.num_processes > 1:
             self.envs = SubprocVecEnv(self.envs)
         else:
             self.envs = DummyVecEnv(self.envs)
-
-        print("we")
 
         if len(self.envs.observation_space.shape) == 1:
             self.envs = VecNormalize(self.envs)
