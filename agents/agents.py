@@ -59,8 +59,27 @@ class Agents:
         else:
             self.envs = DummyVecEnv(self.envs)
 
+        # if len(self.envs.observation_space.shape) == 1:
+        #     self.envs = VecNormalize(self.envs)
+
+# TOTOOTOT
         if len(self.envs.observation_space.shape) == 1:
-            self.envs = VecNormalize(self.envs)
+            self.envs = VecNormalize(self.envs, ret=False)
+            self.envs.ob_rms = ob_rms
+
+            # An ugly hack to remove updates
+            def _obfilt(self, obs):
+                if self.ob_rms:
+                    obs = np.clip((obs - self.ob_rms.mean) / np.sqrt(self.ob_rms.var + self.epsilon), -self.clipob, self.clipob)
+                    return obs
+                else:
+                    return obs
+            self.envs._obfilt = types.MethodType(_obfilt, self.envs)
+            self.render_func = self.envs.venv.envs[0].render
+        else:
+            self.render_func = self.envs.envs[0].render
+# TOTOOTOT
+
 
         obs_shape = self.envs.observation_space.shape
         obs_shape = (obs_shape[0] * self.args.num_stack, *obs_shape[1:])
@@ -102,6 +121,10 @@ class Agents:
                              shape_dim0] = self.current_obs[:, shape_dim0:]
         self.current_obs[:, -shape_dim0:] = obs
 
+    def render(self):
+        if(self.args.render):
+            self.render_func('human')
+
     def train(self):
         print("#######")
         print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
@@ -109,6 +132,7 @@ class Agents:
         sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
+        self.render()
         self.rollouts.observations[0].copy_(self.current_obs)
 
         # These variables are used to compute average rewards for all processes.
@@ -166,7 +190,7 @@ class Agents:
                 self.update_current_obs(obs)
                 self.rollouts.insert(self.current_obs, states.data, action.data,
                                      action_log_prob.data, value.data, reward, masks)
-
+                self.render()
             with torch.no_grad():
                 next_value = self.actor_critic.get_value(self.rollouts.observations[-1],
                                                          self.rollouts.states[-1],
