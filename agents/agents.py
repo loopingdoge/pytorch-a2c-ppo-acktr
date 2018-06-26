@@ -122,6 +122,7 @@ class Agents:
         # print("#######")
         # print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
         # print("#######")
+        print("Training...")
         sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
