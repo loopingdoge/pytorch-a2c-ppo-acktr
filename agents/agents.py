@@ -128,7 +128,7 @@ class Agents:
             "./trained_models/acktr", self.args.env_name + ".pt")
 
         if os.path.exists(saved_state_path):
-            saved_state = torch.load(saved_state_path)
+            saved_state = torch.load(saved_state_path, map_location='cpu')
             self.actor_critic.load_state_dict(saved_state['state_dict'])
             self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
