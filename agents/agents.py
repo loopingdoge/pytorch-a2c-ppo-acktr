@@ -51,7 +51,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env)
+        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
                      for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:
@@ -60,7 +60,23 @@ class Agents:
             self.envs = DummyVecEnv(self.envs)
 
         if len(self.envs.observation_space.shape) == 1:
-            self.envs = VecNormalize(self.envs)
+            # UNUSED
+            self.envs = VecNormalize(self.envs, ret=False)
+            self.envs.ob_rms = ob_rms
+
+            # An ugly hack to remove updates
+            def _obfilt(self, obs):
+                if self.ob_rms:
+                    obs = np.clip((obs - self.ob_rms.mean) / np.sqrt(
+                        self.ob_rms.var + self.epsilon), -self.clipob, self.clipob)
+                    return obs
+                else:
+                    return obs
+            self.envs._obfilt = types.MethodType(_obfilt, self.envs)
+            self.render_func = self.envs.venv.envs[0].render
+        else:
+            if(self.args.num_processes == 1):
+                self.render_func = self.envs.envs[0].render
 
         obs_shape = self.envs.observation_space.shape
         obs_shape = (obs_shape[0] * self.args.num_stack, *obs_shape[1:])
@@ -103,12 +119,13 @@ class Agents:
         self.current_obs[:, -shape_dim0:] = obs
 
     def train(self):
-        print("#######")
-        print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
-        print("#######")
+        # print("#######")
+        # print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
+        # print("#######")
         sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
+        self.render()
         self.rollouts.observations[0].copy_(self.current_obs)
 
         # These variables are used to compute average rewards for all processes.
@@ -123,6 +140,14 @@ class Agents:
 
         num_updates = int(
             self.args.num_frames) // self.args.num_steps // self.args.num_processes
+
+        saved_state_path = os.path.join(
+            "./trained_models/acktr", self.args.env_name + ".pt")
+
+        if os.path.exists(saved_state_path):
+            saved_state = torch.load(saved_state_path, map_location='cpu')
+            self.actor_critic.load_state_dict(saved_state['state_dict'])
+            self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
         for j in range(num_updates):
             for step in range(self.args.num_steps):
@@ -158,7 +183,7 @@ class Agents:
                 self.update_current_obs(obs)
                 self.rollouts.insert(self.current_obs, states.data, action.data,
                                      action_log_prob.data, value.data, reward, masks)
-
+                self.render()
             with torch.no_grad():
                 next_value = self.actor_critic.get_value(self.rollouts.observations[-1],
                                                          self.rollouts.states[-1],
@@ -204,12 +229,20 @@ class Agents:
             pass
 
         # A really ugly way to save a model to CPU
-        save_model = self.actor_critic
-        if self.args.cuda:
-            save_model = copy.deepcopy(self.actor_critic).cpu()
+        # save_model = self.actor_critic
+        # if self.args.cuda:
+        #     save_model = copy.deepcopy(self.actor_critic).cpu()
 
-        save_model = [save_model,
-                      hasattr(self.envs, 'ob_rms') and self.envs.ob_rms or None]
+        # save_model = [save_model,
+        #                 hasattr(self.envs, 'ob_rms') and self.envs.ob_rms or None]
 
-        torch.save(save_model, os.path.join(
+        state = {
+            'state_dict': self.actor_critic.state_dict(),
+            'optimizer': self.agent.optimizer.state_dict()
+        }
+        torch.save(state, os.path.join(
             save_path, self.args.env_name + ".pt"))
+
+    def render(self):
+        if(self.args.render):
+            self.render_func('human')

@@ -7,7 +7,7 @@ import torch
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
 
-from envs import make_env
+from agents.envs import make_env
 
 
 parser = argparse.ArgumentParser(description='RL')
@@ -26,11 +26,13 @@ parser.add_argument('--add-timestep', action='store_true', default=False,
 args = parser.parse_args()
 
 
-env = make_env(args.env_name, args.seed, 0, None, args.add_timestep)
+env = make_env(args.env_name, args.seed, 0, None, args.add_timestep, False)
 env = DummyVecEnv([env])
 
-actor_critic, ob_rms = \
-            torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+
+saved_state_path = os.path.join(args.load_dir, args.env_name + ".pt")
+if os.path.exists(saved_state_path):
+    actor_critic, ob_rms = torch.load(saved_state_path, map_location='cpu')
 
 
 if len(env.observation_space.shape) == 1:

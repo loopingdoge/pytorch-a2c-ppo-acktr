@@ -9,14 +9,17 @@ from retro_contest.local import make
 from baselines.common.atari_wrappers import WarpFrame, FrameStack
 import gym_remote.client as grc
 
-def make_sonic_env(remote_env, stack=False, scale_rew=True):
+
+def make_sonic_env(remote_env, stack=False, scale_rew=True, video_dir=''):
     """
     Create an environment with some standard wrappers.
     """
     if remote_env:
         env = grc.RemoteEnv('tmp/sock')
     else:
-        env = make(game='SonicTheHedgehog-Genesis', state='GreenHillZone.Act1')
+        env = make(game='SonicTheHedgehog-Genesis',
+                   state='GreenHillZone.Act1',
+                   bk2dir=video_dir)
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)
@@ -25,14 +28,17 @@ def make_sonic_env(remote_env, stack=False, scale_rew=True):
         env = FrameStack(env, 4)
     return env
 
+
 class SonicDiscretizer(gym.ActionWrapper):
     """
     Wrap a gym-retro environment and make it use discrete
     actions for the Sonic game.
     """
+
     def __init__(self, env):
         super(SonicDiscretizer, self).__init__(env)
-        buttons = ["B", "A", "MODE", "START", "UP", "DOWN", "LEFT", "RIGHT", "C", "Y", "X", "Z"]
+        buttons = ["B", "A", "MODE", "START", "UP",
+                   "DOWN", "LEFT", "RIGHT", "C", "Y", "X", "Z"]
         actions = [['LEFT'], ['RIGHT'], ['LEFT', 'DOWN'], ['RIGHT', 'DOWN'], ['DOWN'],
                    ['DOWN', 'B'], ['B']]
         self._actions = []
@@ -43,8 +49,9 @@ class SonicDiscretizer(gym.ActionWrapper):
             self._actions.append(arr)
         self.action_space = gym.spaces.Discrete(len(self._actions))
 
-    def action(self, a): # pylint: disable=W0221
+    def action(self, a):  # pylint: disable=W0221
         return self._actions[a].copy()
+
 
 class RewardScaler(gym.RewardWrapper):
     """
@@ -53,8 +60,10 @@ class RewardScaler(gym.RewardWrapper):
     This is incredibly important and effects performance
     drastically.
     """
+
     def reward(self, reward):
         return reward * 0.01
+
 
 class AllowBacktracking(gym.Wrapper):
     """
@@ -63,17 +72,18 @@ class AllowBacktracking(gym.Wrapper):
     from exploring backwards if there is no way to advance
     head-on in the level.
     """
+
     def __init__(self, env):
         super(AllowBacktracking, self).__init__(env)
         self._cur_x = 0
         self._max_x = 0
 
-    def reset(self, **kwargs): # pylint: disable=E0202
+    def reset(self, **kwargs):  # pylint: disable=E0202
         self._cur_x = 0
         self._max_x = 0
         return self.env.reset(**kwargs)
 
-    def step(self, action): # pylint: disable=E0202
+    def step(self, action):  # pylint: disable=E0202
         obs, rew, done, info = self.env.step(action)
         self._cur_x += rew
         rew = max(0, self._cur_x - self._max_x)

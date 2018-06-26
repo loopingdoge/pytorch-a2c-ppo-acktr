@@ -7,6 +7,10 @@ def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument('--remote-env', default=False, action='store_true',
                         help='use the remote gym environment')
+    parser.add_argument('--record', default='',
+                        help='record videos in the given folder')
+    parser.add_argument('--render', default=False, action='store_true',
+                        help='render to screen')
     parser.add_argument('--algo', default='a2c',
                         help='algorithm to use: a2c | ppo | acktr')
     parser.add_argument('--lr', type=float, default=7e-4,
