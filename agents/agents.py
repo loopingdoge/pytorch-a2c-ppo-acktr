@@ -51,7 +51,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env)
+        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
                      for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:
@@ -70,7 +70,8 @@ class Agents:
             # An ugly hack to remove updates
             def _obfilt(self, obs):
                 if self.ob_rms:
-                    obs = np.clip((obs - self.ob_rms.mean) / np.sqrt(self.ob_rms.var + self.epsilon), -self.clipob, self.clipob)
+                    obs = np.clip((obs - self.ob_rms.mean) / np.sqrt(
+                        self.ob_rms.var + self.epsilon), -self.clipob, self.clipob)
                     return obs
                 else:
                     return obs
@@ -121,9 +122,9 @@ class Agents:
         self.current_obs[:, -shape_dim0:] = obs
 
     def train(self):
-        print("#######")
-        print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
-        print("#######")
+        # print("#######")
+        # print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
+        # print("#######")
         sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
@@ -244,7 +245,7 @@ class Agents:
         }
         torch.save(state, os.path.join(
             save_path, self.args.env_name + ".pt"))
-    
+
     def render(self):
         if(self.args.render):
             self.render_func('human')
