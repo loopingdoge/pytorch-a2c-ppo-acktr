@@ -62,8 +62,8 @@ class Agents:
         # if len(self.envs.observation_space.shape) == 1:
         #     self.envs = VecNormalize(self.envs)
 
-# TOTOOTOT
         if len(self.envs.observation_space.shape) == 1:
+            # UNUSED
             self.envs = VecNormalize(self.envs, ret=False)
             self.envs.ob_rms = ob_rms
 
@@ -77,9 +77,8 @@ class Agents:
             self.envs._obfilt = types.MethodType(_obfilt, self.envs)
             self.render_func = self.envs.venv.envs[0].render
         else:
-            self.render_func = self.envs.envs[0].render
-# TOTOOTOT
-
+            if(self.args.num_processes == 1):
+                self.render_func = self.envs.envs[0].render
 
         obs_shape = self.envs.observation_space.shape
         obs_shape = (obs_shape[0] * self.args.num_stack, *obs_shape[1:])
@@ -120,10 +119,6 @@ class Agents:
             self.current_obs[:, :-
                              shape_dim0] = self.current_obs[:, shape_dim0:]
         self.current_obs[:, -shape_dim0:] = obs
-
-    def render(self):
-        if(self.args.render):
-            self.render_func('human')
 
     def train(self):
         print("#######")
@@ -249,3 +244,7 @@ class Agents:
         }
         torch.save(state, os.path.join(
             save_path, self.args.env_name + ".pt"))
+    
+    def render(self):
+        if(self.args.render):
+            self.render_func('human')
