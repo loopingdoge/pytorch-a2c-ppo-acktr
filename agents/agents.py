@@ -235,13 +235,16 @@ class Agents:
                                            self.args.algo, self.args.num_frames)
                 except IOError:
                     pass
+                    
+        if len(final_scores) > 1:
+            average_score = reduce(
+                lambda x, y: x + y, final_scores, 0) / len(final_scores)
+            average_score_std = stdev(final_scores)
+        else:
+            average_score = 0
+            average_score_std = 0
 
-        average_score = reduce(
-            lambda x, y: x + y, final_scores, 0) / len(final_scores)
-
-        average_score_std = stdev(final_scores)
-
-        return (average_score, average_score_std), (final_rewards.mean(), final_rewards.std())
+        return (average_score, average_score_std), (final_rewards.mean().item(), final_rewards.std().item())
 
     def save_model(self):
         save_path = os.path.join(self.args.save_dir, self.args.algo)
