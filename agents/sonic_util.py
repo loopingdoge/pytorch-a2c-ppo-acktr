@@ -10,15 +10,15 @@ from baselines.common.atari_wrappers import WarpFrame, FrameStack
 import gym_remote.client as grc
 
 
-def make_sonic_env(remote_env, stack=False, scale_rew=True, video_dir=''):
+def make_sonic_env(game, state, remote_env, stack=False, scale_rew=True, video_dir=''):
     """
     Create an environment with some standard wrappers.
     """
     if remote_env:
         env = grc.RemoteEnv('tmp/sock')
     else:
-        env = make(game='SonicTheHedgehog-Genesis',
-                   state='GreenHillZone.Act1',
+        env = make(game=game,
+                   state=state,
                    bk2dir=video_dir)
     env = SonicDiscretizer(env)
     if scale_rew:
