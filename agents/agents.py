@@ -51,7 +51,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
+        self.envs = [make_env(self.args.game, self.args.level, self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
                      for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:
@@ -218,8 +218,9 @@ class Agents:
                 sys.stdout.flush()
             if self.args.vis and j % self.args.vis_interval == 0:
                 try:
+                    plot_title = "{} - {}".format(self.args.game, self.args.level)
                     # Sometimes monitor doesn't properly flush the outputs
-                    self.win = visdom_plot(self.viz, self.win, self.args.log_dir, self.args.env_name,
+                    self.win = visdom_plot(self.viz, self.win, self.args.log_dir, plot_title,
                                            self.args.algo, self.args.num_frames)
                 except IOError:
                     pass

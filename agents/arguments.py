@@ -7,6 +7,10 @@ def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument('--remote-env', default=False, action='store_true',
                         help='use the remote gym environment')
+    parser.add_argument('--game', default='SonicTheHedgehog-Genesis',
+                        help='game to train on (default: SonicTheHedgehog-Genesis)')
+    parser.add_argument('--level', default='GreenHillZone.Act1',
+                        help='lebel to train on (default: GreenHillZone.Act1)')
     parser.add_argument('--record', default='',
                         help='record videos in the given folder')
     parser.add_argument('--render', default=False, action='store_true',

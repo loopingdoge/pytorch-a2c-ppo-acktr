@@ -25,13 +25,14 @@ except ImportError:
     pass
 
 
-def make_env(env_id, seed, rank, log_dir, add_timestep, remote_env, video_dir):
+def make_env(game, state, env_id, seed, rank, log_dir, add_timestep, remote_env, video_dir):
     def _thunk():
         if env_id.startswith("dm"):
             _, domain, task = env_id.split('.')
             env = dm_control2gym.make(domain_name=domain, task_name=task)
         elif env_id.startswith("Sonic"):
             env = AllowBacktracking(make_sonic_env(
+                game=game, state=state,
                 remote_env=remote_env, video_dir=video_dir))
         else:
             env = gym.make(env_id)
