@@ -12,6 +12,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from functools import reduce
+from statistics import stdev
 
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -228,15 +229,19 @@ class Agents:
             if self.args.vis and j % self.args.vis_interval == 0:
                 try:
                     # Sometimes monitor doesn't properly flush the outputs
-                    plot_title = "{} - {}".format(self.args.game, self.args.level)
+                    plot_title = "{} - {}".format(self.args.game,
+                                                  self.args.level)
                     self.win = visdom_plot(self.viz, self.win, self.args.log_dir, plot_title,
                                            self.args.algo, self.args.num_frames)
                 except IOError:
                     pass
 
         average_score = reduce(
-            lambda x, y: x + y, final_scores) / len(final_scores)
-        print(f'Average score: {average_score:f}')
+            lambda x, y: x + y, final_scores, 0) / len(final_scores)
+
+        average_score_std = stdev(final_scores)
+
+        return (average_score, average_score_std), (final_rewards.mean(), final_rewards.std())
 
     def save_model(self):
         save_path = os.path.join(self.args.save_dir, self.args.algo)
