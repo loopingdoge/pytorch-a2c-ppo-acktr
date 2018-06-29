@@ -265,8 +265,13 @@ class Agents:
             'state_dict': self.actor_critic.state_dict(),
             'optimizer': self.agent.optimizer.state_dict()
         }
+        if self.args.full_set:
+            filename = f"{self.args.env_name}-{self.args.level}.pt"
+        else:
+            filename = self.args.env_name + ".pt"
+            
         torch.save(state, os.path.join(
-            save_path, self.args.env_name + ".pt"))
+            save_path, filename))
 
     def render(self):
         if(self.args.render):
