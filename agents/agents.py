@@ -11,6 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from functools import reduce
+
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
@@ -150,6 +152,8 @@ class Agents:
             self.actor_critic.load_state_dict(saved_state['state_dict'])
             self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
+        final_scores = []
+
         for j in range(num_updates):
             for step in range(self.args.num_steps):
                 # Sample actions
@@ -169,9 +173,16 @@ class Agents:
                 # If done then clean the history of observations.
                 masks = torch.FloatTensor(
                     [[0.0] if done_ else [1.0] for done_ in done])
+
                 final_rewards *= masks
                 final_rewards += (1 - masks) * episode_rewards
+
                 episode_rewards *= masks
+
+                for i in range(len(masks)):
+                    if masks[i] == 0.0:
+                        float_reward = float(final_rewards[i][0])
+                        final_scores.append(float_reward)
 
                 if self.args.cuda:
                     masks = masks.cuda()
@@ -221,6 +232,10 @@ class Agents:
                                            self.args.algo, self.args.num_frames)
                 except IOError:
                     pass
+
+        average_score = reduce(
+            lambda x, y: x + y, final_scores) / len(final_scores)
+        print(f'Average score: {average_score:f}')
 
     def save_model(self):
         save_path = os.path.join(self.args.save_dir, self.args.algo)
