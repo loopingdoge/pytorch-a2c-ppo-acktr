@@ -30,7 +30,7 @@ results = {}
 for game, levels in test_set.items():
     for level in levels:
         print(game, level)
-        out = check_output(['python', 'main.py', '--env-name', 'Sonic-v0-training', '--algo', 'acktr', '--num-processes', '16', '--num-steps', '20', '--num-frames', '30000', '--game', game, '--level', level, '--silent', '--testing']).decode("utf-8") 
+        out = check_output(['python', 'main.py', '--env-name', 'Sonic-v0-training', '--algo', 'acktr', '--num-processes', '16', '--num-steps', '20', '--num-frames', '1000000', '--game', game, '--level', level, '--silent', '--testing']).decode("utf-8") 
         lines = out.split('\n')
 
         [avg, avg_std] = lines[0].split(' ')
