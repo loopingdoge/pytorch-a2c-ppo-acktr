@@ -10,6 +10,8 @@ def get_args():
     parser.add_argument('--silent', default=False, action='store_true', help='Prints only the final scores')
     parser.add_argument('--full-set', default=False, action='store_true',
                         help='train on the complete test set')
+    parser.add_argument('--testing', default=False, action='store_true',
+                        help='will not overwrite the .pt weights')
     parser.add_argument('--game', default='SonicTheHedgehog-Genesis',
                         help='game to train on (default: SonicTheHedgehog-Genesis)')
     parser.add_argument('--level', default='GreenHillZone.Act1',

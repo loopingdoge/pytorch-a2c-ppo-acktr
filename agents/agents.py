@@ -269,7 +269,7 @@ class Agents:
             'state_dict': self.actor_critic.state_dict(),
             'optimizer': self.agent.optimizer.state_dict()
         }
-        if self.args.full_set:
+        if self.args.full_set or self.args.testing:
             filename = f"{self.args.env_name}-{self.args.level}.pt"
         else:
             filename = self.args.env_name + ".pt"
