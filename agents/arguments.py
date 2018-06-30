@@ -7,6 +7,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument('--remote-env', default=False, action='store_true',
                         help='use the remote gym environment')
+    parser.add_argument('--silent', default=False, action='store_true', help='Prints only the final scores')
     parser.add_argument('--full-set', default=False, action='store_true',
                         help='train on the complete test set')
     parser.add_argument('--game', default='SonicTheHedgehog-Genesis',

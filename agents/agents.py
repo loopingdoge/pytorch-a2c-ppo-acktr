@@ -25,6 +25,10 @@ from .visualize import visdom_plot
 import agents.algo as algo
 
 
+def silent_print(isSilent, msg):
+    if not isSilent:
+        print(msg)
+
 class Agents:
     envs = None
 
@@ -125,7 +129,7 @@ class Agents:
         # print("#######")
         # print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
         # print("#######")
-        print("Training...")
+        silent_print(self.args.silent, "Training...")
         sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
@@ -149,7 +153,7 @@ class Agents:
             "./trained_models/acktr", self.args.env_name + ".pt")
 
         if os.path.exists(saved_state_path):
-            saved_state = torch.load(saved_state_path, map_location='cpu')
+            saved_state = torch.load(saved_state_path)
             self.actor_critic.load_state_dict(saved_state['state_dict'])
             self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
@@ -217,7 +221,7 @@ class Agents:
                 end = time.time()
                 total_num_steps = (
                     j + 1) * self.args.num_processes * self.args.num_steps
-                print("Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
+                silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                       format(j, total_num_steps,
                              int(total_num_steps / (end - start)),
                              final_rewards.mean(),

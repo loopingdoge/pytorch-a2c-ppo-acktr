@@ -6,7 +6,7 @@ from statistics import stdev
 
 test_set = {
     'SonicAndKnuckles3-Genesis': [
-        "AngelIslandZone.Act2",
+        "AngelIslandZone.Act2",  
         "FlyingBatteryZone.Act2",
         "HydrocityZone.Act1",
         "LavaReefZone.Act1"
@@ -30,8 +30,12 @@ def main():
     if args.full_set == False:
         acktr = Agents(args)
         (avg, avg_std), (final_mean, final_std) = acktr.train()
-        print(f'Average score: {avg:f} ± {avg_std:f}')
-        print(f'Final best score: {final_mean:f} ± {final_std:f}')
+        if args.silent:
+            print(f'{avg:f} {avg_std:f}')
+            print(f'{final_mean:f} {final_std:f}')
+        else:
+            print(f'Average score: {avg:f} ± {avg_std:f}')
+            print(f'Final best score: {final_mean:f} ± {final_std:f}')
     else:
         results = {}
         for game, levels in test_set.items():
