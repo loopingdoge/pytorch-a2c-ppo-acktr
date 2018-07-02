@@ -5,6 +5,21 @@ import torch
 
 def get_args():
     parser = argparse.ArgumentParser(description='RL')
+    parser.add_argument('--remote-env', default=False, action='store_true',
+                        help='use the remote gym environment')
+    parser.add_argument('--silent', default=False, action='store_true', help='Prints only the final scores')
+    parser.add_argument('--full-set', default=False, action='store_true',
+                        help='train on the complete test set')
+    parser.add_argument('--testing', default=False, action='store_true',
+                        help='will not overwrite the .pt weights')
+    parser.add_argument('--game', default='SonicTheHedgehog-Genesis',
+                        help='game to train on (default: SonicTheHedgehog-Genesis)')
+    parser.add_argument('--level', default='GreenHillZone.Act1',
+                        help='lebel to train on (default: GreenHillZone.Act1)')
+    parser.add_argument('--record', default='',
+                        help='record videos in the given folder')
+    parser.add_argument('--render', default=False, action='store_true',
+                        help='render to screen')
     parser.add_argument('--algo', default='a2c',
                         help='algorithm to use: a2c | ppo | acktr')
     parser.add_argument('--lr', type=float, default=7e-4,
@@ -45,8 +60,8 @@ def get_args():
                         help='save interval, one save per n updates (default: 10)')
     parser.add_argument('--vis-interval', type=int, default=100,
                         help='vis interval, one log per n updates (default: 100)')
-    parser.add_argument('--num-frames', type=int, default=10e6,
-                        help='number of frames to train (default: 10e6)')
+    parser.add_argument('--num-frames', type=int, default=1e6,
+                        help='number of frames to train (default: 1e6)')
     parser.add_argument('--env-name', default='PongNoFrameskip-v4',
                         help='environment to train on (default: PongNoFrameskip-v4)')
     parser.add_argument('--log-dir', default='/tmp/gym/',

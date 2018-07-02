@@ -34,6 +34,8 @@ class Agents:
 
     def __init__(self, args, game, level):
         self.args = args
+        self.game = game
+        self.level = level
 
         assert self.args.algo in ['a2c', 'ppo', 'acktr']
         if self.args.recurrent_policy:
@@ -140,6 +142,8 @@ class Agents:
         self.x_vals = np.array([])
         self.y_vals = np.array([])
 
+        self.start = time.time()
+
     def compute_steps(self):
         for step in range(self.args.num_steps):
             # Sample actions
@@ -195,7 +199,7 @@ class Agents:
 
         self.rollouts.after_update()
 
-        return self.actor_critic.named_parameters()
+        return self.actor_critic.named_parameters(), self.final_rewards.mean()
 
     def save_model(self):
         save_path = os.path.join(self.args.save_dir, self.args.algo)
@@ -217,13 +221,13 @@ class Agents:
         torch.save(state, os.path.join(
             save_path, filename))
 
-    def print_progress(self, start, curr):
+    def print_progress(self, curr):
         end = time.time()
         total_num_steps = (
                     curr + 1) * self.args.num_processes * self.args.num_steps
         # print("Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
         #       format(curr, total_num_steps,
-        #              int(total_num_steps / (end - start)),
+        #              int(total_num_steps / (end - self.start)),
         #              self.final_rewards.mean(),
         #              self.final_rewards.median(),
         #              self.final_rewards.min(),
@@ -231,7 +235,7 @@ class Agents:
         #              self.value_loss, self.action_loss))
         silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}".
                       format(curr, total_num_steps,
-                             int(total_num_steps / (end - start)),
+                             int(total_num_steps / (end - self.start)),
                              self.final_rewards.mean(),
                              self.final_rewards.median(),
                              self.final_rewards.min(),
@@ -245,9 +249,9 @@ class Agents:
         #                            self.args.algo, self.args.num_frames)
         # except IOError:
         #     pass
-        plot_title = "{} - {} - {}".format(self.args.game,
-                                                  self.args.level,
-                                                  self.args.algo)
+        plot_title = "{} - {} - {}".format(self.game,
+                                                self.level,
+                                                self.args.algo)
         total_num_steps = (
             curr + 1) * self.args.num_processes * self.args.num_steps
 
@@ -255,8 +259,8 @@ class Agents:
         self.y_vals = np.append(self.y_vals, [self.final_rewards.mean()])
 
         opts = dict(
-            width=640,
-            height=450,
+            width=400,
+            height=300,
             xlabel='Timesteps',
             ylabel='Score',
             title=plot_title,

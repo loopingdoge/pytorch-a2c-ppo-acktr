@@ -3,6 +3,8 @@ import time
 from agents import Agents
 from agents.arguments import get_args
 from copy import deepcopy
+from functools import reduce
+from random import shuffle
 
 train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
              ("SonicTheHedgehog-Genesis", "SpringYardZone.Act2"),
@@ -52,13 +54,32 @@ train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
              ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act2"),
              ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act1")]
 
+# train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
+#              ("SonicTheHedgehog-Genesis", "SpringYardZone.Act2"),
+#              ("SonicTheHedgehog-Genesis", "GreenHillZone.Act3"),
+#              ("SonicTheHedgehog-Genesis", "GreenHillZone.Act1"),
+#              ("SonicTheHedgehog-Genesis", "StarLightZone.Act2"),
+#              ("SonicTheHedgehog-Genesis", "StarLightZone.Act1"),
+#              ("SonicTheHedgehog-Genesis", "ScrapBrainZone.Act2"),
+#              ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act1"),
+#              ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act2"),
+#              ("SonicTheHedgehog2-Genesis", "HillTopZone.Act1"),
+#              ("SonicTheHedgehog2-Genesis", "CasinoNightZone.Act1"),
+#              ("SonicAndKnuckles3-Genesis", "LavaReefZone.Act2"),
+#              ("SonicAndKnuckles3-Genesis", "FlyingBatteryZone.Act1"),
+#              ("SonicAndKnuckles3-Genesis", "HydrocityZone.Act2"),
+#              ("SonicAndKnuckles3-Genesis", "AngelIslandZone.Act1"),
+# ]
+
+shuffle(train_set)
+
 
 def multiple_agents(train_set):
     args = get_args()
 
     num_updates = int(args.num_frames) // args.num_steps // args.num_processes
 
-    train_subset = train_set[:3]
+    train_subset = train_set
 
     agents = []
     for i in range(len(train_subset)):
@@ -68,10 +89,17 @@ def multiple_agents(train_set):
     for a in agents:
         a.init_training()
 
-    start = time.time()
+    scores = []
 
     for j in range(num_updates):
-        params = list(map(lambda a: dict(a.compute_steps()), agents))
+        params = []
+
+        for a in agents:
+            weights, score = a.compute_steps()
+            params.append(dict(weights))
+            scores.append(score)
+
+        # params = list(map(lambda a: dict(a.compute_steps()), agents))
 
         params_sum = deepcopy(params[0])
         for p in params[1:]:
@@ -90,10 +118,16 @@ def multiple_agents(train_set):
             agents[0].save_model()
 
             if j % args.log_interval == 0:
-                agents[0].print_progress(start, j)
+                for a in agents:
+                    a.print_progress(j)
+                
+                avg_score = reduce(lambda x, y: x + y, scores, 0) / len(scores)
+                print(f'Aggregate: {avg_score}\n')
+                scores = []
 
             if args.vis and j % args.vis_interval == 0:
-                agents[0].plot()
+                for a in agents:
+                    a.plot(j)
 
 
 if __name__ == "__main__":
