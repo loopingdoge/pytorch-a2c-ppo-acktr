@@ -30,7 +30,7 @@ def main():
     if args.full_set == False:
         acktr = Agents(args)
         (avg, avg_std), (final_mean, final_std) = acktr.train()
-        if args.silent:
+        if args.testing:
             print(f'{avg:f} {avg_std:f}')
             print(f'{final_mean:f} {final_std:f}')
         else:
