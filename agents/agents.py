@@ -2,6 +2,7 @@ import copy
 import glob
 import os
 import time
+import sys
 
 import gym
 import numpy as np
@@ -9,6 +10,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+
+from functools import reduce
+from statistics import stdev
 
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -20,6 +24,10 @@ from .visualize import visdom_plot
 
 import agents.algo as algo
 
+
+def silent_print(isSilent, msg):
+    if not isSilent:
+        print(msg)
 
 class Agents:
     envs = None
@@ -105,7 +113,8 @@ class Agents:
         # print("#######")
         # print("WARNING: All rewards are clipped or normalized so you need to use a monitor (see self.envs.py) or visdom plot to get true rewards")
         # print("#######")
-
+        silent_print(self.args.silent, "Training...")
+        sys.stdout.flush()
         obs = self.envs.reset()
         self.update_current_obs(obs)
         self.rollouts.observations[0].copy_(self.current_obs)
@@ -119,12 +128,17 @@ class Agents:
             self.rollouts.cuda()
 
         saved_state_path = os.path.join(
-            "./trained_models/acktr", self.args.env_name + ".pt")
+            f"./trained_models/{self.args.algo}", self.args.env_name + ".pt")
 
         if os.path.exists(saved_state_path):
+            silent_print(self.args.silent, "Loading weights...")
             saved_state = torch.load(saved_state_path)
             self.actor_critic.load_state_dict(saved_state['state_dict'])
             self.agent.optimizer.load_state_dict(saved_state['optimizer'])
+        
+        self.final_scores = []
+        self.x_vals = np.array([])
+        self.y_vals = np.array([])
 
     def compute_steps(self):
         for step in range(self.args.num_steps):
@@ -145,9 +159,16 @@ class Agents:
             # If done then clean the history of observations.
             masks = torch.FloatTensor(
                 [[0.0] if done_ else [1.0] for done_ in done])
+
             self.final_rewards *= masks
             self.final_rewards += (1 - masks) * self.episode_rewards
+
             self.episode_rewards *= masks
+
+            for i in range(len(masks)):
+                    if masks[i] == 0.0:
+                        float_reward = float(self.final_rewards[i][0])
+                        self.final_scores.append(float_reward)
 
             if self.args.cuda:
                 masks = masks.cuda()
@@ -187,29 +208,68 @@ class Agents:
             'state_dict': self.actor_critic.state_dict(),
             'optimizer': self.agent.optimizer.state_dict()
         }
+
+        if self.args.full_set or self.args.testing:
+            filename = f"{self.args.env_name}-{self.args.level}.pt"
+        else:
+            filename = self.args.env_name + ".pt"
+            
         torch.save(state, os.path.join(
-            save_path, self.args.env_name + ".pt"))
+            save_path, filename))
 
     def print_progress(self, start, curr):
         end = time.time()
-        total_num_steps = (curr + 1) * \
-            self.args.num_processes * self.args.num_steps
-        print("Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
-              format(curr, total_num_steps,
-                     int(total_num_steps / (end - start)),
-                     self.final_rewards.mean(),
-                     self.final_rewards.median(),
-                     self.final_rewards.min(),
-                     self.final_rewards.max(), self.dist_entropy,
-                     self.value_loss, self.action_loss))
+        total_num_steps = (
+                    curr + 1) * self.args.num_processes * self.args.num_steps
+        # print("Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
+        #       format(curr, total_num_steps,
+        #              int(total_num_steps / (end - start)),
+        #              self.final_rewards.mean(),
+        #              self.final_rewards.median(),
+        #              self.final_rewards.min(),
+        #              self.final_rewards.max(), self.dist_entropy,
+        #              self.value_loss, self.action_loss))
+        silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}".
+                      format(curr, total_num_steps,
+                             int(total_num_steps / (end - start)),
+                             self.final_rewards.mean(),
+                             self.final_rewards.median(),
+                             self.final_rewards.min(),
+                             self.final_rewards.max()))
+        sys.stdout.flush()
 
-    def plot(self):
-        try:
-            # Sometimes monitor doesn't properly flush the outputs
-            self.win = visdom_plot(self.viz, self.win, self.args.log_dir, self.args.env_name,
-                                   self.args.algo, self.args.num_frames)
-        except IOError:
-            pass
+    def plot(self, curr):
+        # try:
+        #     # Sometimes monitor doesn't properly flush the outputs
+        #     self.win = visdom_plot(self.viz, self.win, self.args.log_dir, self.args.env_name,
+        #                            self.args.algo, self.args.num_frames)
+        # except IOError:
+        #     pass
+        plot_title = "{} - {} - {}".format(self.args.game,
+                                                  self.args.level,
+                                                  self.args.algo)
+        total_num_steps = (
+            curr + 1) * self.args.num_processes * self.args.num_steps
+
+        self.x_vals = np.append(self.x_vals, [total_num_steps])
+        self.y_vals = np.append(self.y_vals, [self.final_rewards.mean()])
+
+        opts = dict(
+            width=640,
+            height=450,
+            xlabel='Timesteps',
+            ylabel='Score',
+            title=plot_title,
+            xtickmax=self.args.num_frames
+        )
+        
+        if self.win:
+            self.win = self.viz.line(self.y_vals, self.x_vals, win=self.win, update='append', opts=opts)
+        else:
+            self.win = self.viz.line(self.y_vals, self.x_vals, opts=opts)
+
+        self.x_vals = np.array([])
+        self.y_vals = np.array([])
 
     def substitute_params(self, params):
         self.actor_critic.load_state_dict(params)
