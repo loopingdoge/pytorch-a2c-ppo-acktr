@@ -55,7 +55,7 @@ class Agents:
 
         if self.args.vis:
             from visdom import Visdom
-            self.viz = Visdom(port=self.args.port)
+            self.viz = Visdom(port=self.args.port, env=self.args.env_name)
             self.win = None
 
         self.envs = [make_env(self.args.game, self.args.level, self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
@@ -150,14 +150,17 @@ class Agents:
             self.args.num_frames) // self.args.num_steps // self.args.num_processes
 
         saved_state_path = os.path.join(
-            "./trained_models/acktr", self.args.env_name + ".pt")
+            f"./trained_models/{self.args.algo}", self.args.env_name + ".pt")
 
         if os.path.exists(saved_state_path):
+            silent_print(self.args.silent, "Loading weights...")
             saved_state = torch.load(saved_state_path)
             self.actor_critic.load_state_dict(saved_state['state_dict'])
             self.agent.optimizer.load_state_dict(saved_state['optimizer'])
 
         final_scores = []
+        x_vals = np.array([])
+        y_vals = np.array([])
 
         for j in range(num_updates):
             for step in range(self.args.num_steps):
@@ -221,24 +224,55 @@ class Agents:
                 end = time.time()
                 total_num_steps = (
                     j + 1) * self.args.num_processes * self.args.num_steps
-                silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
+
+                # silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
+                #       format(j, total_num_steps,
+                #              int(total_num_steps / (end - start)),
+                #              final_rewards.mean(),
+                #              final_rewards.median(),
+                #              final_rewards.min(),
+                #              final_rewards.max(), dist_entropy,
+                #              value_loss, action_loss))
+                silent_print(self.args.silent, "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}".
                       format(j, total_num_steps,
                              int(total_num_steps / (end - start)),
                              final_rewards.mean(),
                              final_rewards.median(),
                              final_rewards.min(),
-                             final_rewards.max(), dist_entropy,
-                             value_loss, action_loss))
+                             final_rewards.max()))
                 sys.stdout.flush()
-            if self.args.vis and j % self.args.vis_interval == 0:
-                try:
+            if self.args.vis and j % self.args.vis_interval == 0 and j > 0:
+                # try:
                     # Sometimes monitor doesn't properly flush the outputs
-                    plot_title = "{} - {}".format(self.args.game,
-                                                  self.args.level)
-                    self.win = visdom_plot(self.viz, self.win, self.args.log_dir, plot_title,
-                                           self.args.algo, self.args.num_frames)
-                except IOError:
-                    pass
+                plot_title = "{} - {} - {}".format(self.args.game,
+                                                  self.args.level,
+                                                  self.args.algo)
+                total_num_steps = (
+                    j + 1) * self.args.num_processes * self.args.num_steps
+
+                x_vals = np.append(x_vals, [total_num_steps])
+                y_vals = np.append(y_vals, [final_rewards.mean()])
+
+                opts = dict(
+                    width=640,
+                    height=450,
+                    xlabel='Timesteps',
+                    ylabel='Score',
+                    title=plot_title,
+                    xtickmax=self.args.num_frames
+                )
+                
+                if self.win:
+                    self.win = self.viz.line(y_vals, x_vals, win=self.win, update='append', opts=opts)
+                else:
+                    self.win = self.viz.line(y_vals, x_vals, opts=opts)
+
+                x_vals = np.array([])
+                y_vals = np.array([])
+                # self.win = visdom_plot(self.viz, self.win, self.args.log_dir, plot_title,
+                                        #    self.args.algo, self.args.num_frames)
+                # except IOError:
+                #     pass
                     
         if len(final_scores) > 1:
             average_score = reduce(
