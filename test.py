@@ -23,6 +23,13 @@ test_set = {
     ]
 }
 
+num_steps = 1000000
+env_name = 'Sonic-v45M'
+algo = 'acktr'
+recurrent = ''
+
+if algo == 'a2c' or algo == 'ppo':
+    recurrent = '--recurrent-policy'
 
 test_set_tuples = []
 results = {}
@@ -30,14 +37,33 @@ results = {}
 for game, levels in test_set.items():
     for level in levels:
         print(game, level)
-        out = check_output(['python', 'main.py', '--env-name', 'Sonic-v0-training', '--algo', 'acktr', '--num-processes', '16', '--num-steps', '20', '--num-frames', '1000000', '--game', game, '--level', level, '--silent', '--testing']).decode("utf-8") 
+
+        execution = [
+            'python',           'main.py',
+            '--env-name',       env_name,
+            '--algo',           algo,
+            '--num-processes',  '16',
+            '--num-steps',      '20',
+            '--num-frames',     str(num_steps),
+            '--game',           game,
+            '--level',          level,
+            '--vis-interval',   '50',
+            '--silent',
+            '--testing',
+            '--record', './record'
+        ]
+        if len(recurrent) > 0:
+            execution.append(recurrent)
+
+        out = check_output(execution).decode("utf-8") 
+        
         lines = out.split('\n')
 
-        [avg, avg_std] = lines[0].split(' ')
+        [avg, avg_std] = lines[-3].split(' ')
         avg = float(avg)
         avg_std = float(avg_std)
 
-        [final_mean, final_std] = lines[1].split(' ')
+        [final_mean, final_std] = lines[-2].split(' ')
         final_mean = float(final_mean)
         final_std = float(final_std)
 

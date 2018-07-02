@@ -25,14 +25,44 @@ train_set = {
     ]
 }
 
+# train_set = {
+#     'SonicTheHedgehog-Genesis': [
+#         "GreenHillZone.Act3",
+#     ]
+# }
+
+num_iters = 1
+num_steps = 1000000
+env_name = 'Sonic-v0GreenHill'
+algo = 'acktr'
+recurrent = ''
+
+if algo == 'a2c' or algo == 'ppo':
+    recurrent = '--recurrent-policy'
+
 train_set_tuples = []
 
 for game, levels in train_set.items():
     for level in levels:
         train_set_tuples.append((game, level))
 
-while True:
+for i in range(num_iters):
     shuffle(train_set_tuples)
     for (game, level) in train_set_tuples:
-        print(game, level)
-        call(['python', 'main.py', '--env-name', 'Sonic-v0-training', '--algo', 'acktr', '--num-processes', '16', '--num-steps', '20', '--num-frames', '100000', '--game', game, '--level', level]) 
+        print(i, game, level)
+        
+        execution = [
+            'python',           'main.py',
+            '--env-name',       env_name,
+            '--algo',           algo,
+            '--num-processes',  '16',
+            '--num-steps',      '20',
+            '--num-frames',     str(num_steps),
+            '--game',           game,
+            '--level',          level,
+            '--vis-interval',   '50'
+        ]
+        if len(recurrent) > 0:
+            execution.append(recurrent)
+
+        call(execution)
