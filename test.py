@@ -24,7 +24,7 @@ test_set = {
 }
 
 num_steps = 1000000
-env_name = 'Sonic-v45M'
+env_name = 'Sonic-v0Multiple'
 algo = 'acktr'
 recurrent = ''
 
@@ -60,15 +60,15 @@ for game, levels in test_set.items():
         lines = out.split('\n')
 
         [avg, avg_std] = lines[-3].split(' ')
-        avg = float(avg)
-        avg_std = float(avg_std)
+        avg = float(avg) * 100
+        avg_std = float(avg_std) * 100
 
         [final_mean, final_std] = lines[-2].split(' ')
-        final_mean = float(final_mean)
-        final_std = float(final_std)
+        final_mean = float(final_mean) * 100
+        final_std = float(final_std) * 100
 
-        print(f'Average score: {avg:f} ± {avg_std:f}')
-        print(f'Final best score: {final_mean:f} ± {final_std:f}')
+        print(f'Average score: {avg:.1f} ± {avg_std:.1f}')
+        print(f'Final best score: {final_mean:.1f} ± {final_std:.1f}')
         print()
         
         results[level] = {
@@ -89,15 +89,15 @@ aggregated_finals_std = stdev(finals)
 
 print("\n## RESULTS ##\n")
 for key, res in results.items():
-    print(f"{key}   {res['avg']:f} ± {res['avg_std']:f}     {res['final_mean']:f} ± {res['final_std']:f}")
+    print(f"{key}   {res['avg']:.1f} ± {res['avg_std']:.1f}     {res['final_mean']:.1f} ± {res['final_std']:.1f}")
 
-print(f"Aggregated   {aggregated_avgs:f} ± {aggregated_avgs_std:f}     {aggregated_finals:f} ± {aggregated_finals_std:f}\n")
+print(f"Aggregated   {aggregated_avgs:.1f} ± {aggregated_avgs_std:.1f}     {aggregated_finals:.1f} ± {aggregated_finals_std:.1f}\n")
 
 print("\n## CSV ##\n")
 
 print('State,Score,Final Score')
 
 for key, res in results.items():
-    print(f"{key},{res['avg']:f} ± {res['avg_std']:f},{res['final_mean']:f} ± {res['final_std']:f}")
+    print(f"{key},{res['avg']:.1f} ± {res['avg_std']:.1f},{res['final_mean']:.1f} ± {res['final_std']:.1f}")
 
-print(f"Aggregated,{aggregated_avgs:f} ± {aggregated_avgs_std:f},{aggregated_finals:f} ± {aggregated_finals_std:f}\n")
+print(f"Aggregated,{aggregated_avgs:.1f} ± {aggregated_avgs_std:.1f},{aggregated_finals:.1f} ± {aggregated_finals_std:.1f}\n")
