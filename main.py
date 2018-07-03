@@ -54,22 +54,22 @@ train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
              ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act2"),
              ("SonicAndKnuckles3-Genesis", "LaunchBaseZone.Act1")]
 
-# train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
-#              ("SonicTheHedgehog-Genesis", "SpringYardZone.Act2"),
-#              ("SonicTheHedgehog-Genesis", "GreenHillZone.Act3"),
-#              ("SonicTheHedgehog-Genesis", "GreenHillZone.Act1"),
-#              ("SonicTheHedgehog-Genesis", "StarLightZone.Act2"),
-#              ("SonicTheHedgehog-Genesis", "StarLightZone.Act1"),
-#              ("SonicTheHedgehog-Genesis", "ScrapBrainZone.Act2"),
-#              ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act1"),
-#              ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act2"),
-#              ("SonicTheHedgehog2-Genesis", "HillTopZone.Act1"),
-#              ("SonicTheHedgehog2-Genesis", "CasinoNightZone.Act1"),
-#              ("SonicAndKnuckles3-Genesis", "LavaReefZone.Act2"),
-#              ("SonicAndKnuckles3-Genesis", "FlyingBatteryZone.Act1"),
-#              ("SonicAndKnuckles3-Genesis", "HydrocityZone.Act2"),
-#              ("SonicAndKnuckles3-Genesis", "AngelIslandZone.Act1"),
-# ]
+train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
+             ("SonicTheHedgehog-Genesis", "SpringYardZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "GreenHillZone.Act3"),
+             ("SonicTheHedgehog-Genesis", "GreenHillZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "StarLightZone.Act2"),
+             ("SonicTheHedgehog-Genesis", "StarLightZone.Act1"),
+             ("SonicTheHedgehog-Genesis", "ScrapBrainZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "MetropolisZone.Act2"),
+             ("SonicTheHedgehog2-Genesis", "HillTopZone.Act1"),
+             ("SonicTheHedgehog2-Genesis", "CasinoNightZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "LavaReefZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "FlyingBatteryZone.Act1"),
+             ("SonicAndKnuckles3-Genesis", "HydrocityZone.Act2"),
+             ("SonicAndKnuckles3-Genesis", "AngelIslandZone.Act1"),
+]
 
 shuffle(train_set)
 
@@ -117,17 +117,17 @@ def multiple_agents(train_set):
         if j % args.save_interval == 0 and args.save_dir != "":
             agents[0].save_model()
 
-            if j % args.log_interval == 0:
-                for a in agents:
-                    a.print_progress(j)
-                
-                avg_score = reduce(lambda x, y: x + y, scores, 0) / len(scores)
-                print(f'Aggregate: {avg_score}\n')
-                scores = []
+        if j % args.log_interval == 0:
+            for a in agents:
+                a.print_progress(j)
+            
+            avg_score = reduce(lambda x, y: x + y, scores, 0) / len(scores)
+            print(f'Aggregate: {avg_score:.1f}\n')
+            scores = []
 
-            if args.vis and j % args.vis_interval == 0:
-                for a in agents:
-                    a.plot(j)
+        if args.vis and j % args.vis_interval == 0:
+            for a in agents:
+                a.plot(j)
 
 
 if __name__ == "__main__":
