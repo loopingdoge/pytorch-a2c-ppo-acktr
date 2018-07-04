@@ -4,6 +4,10 @@ Environments and wrappers for Sonic training.
 
 import gym
 import numpy as np
+import sys
+
+from math import floor
+from random import randrange
 
 from retro_contest.local import make
 from baselines.common.atari_wrappers import WarpFrame, FrameStack
@@ -26,6 +30,7 @@ def make_sonic_env(game, state, remote_env, stack=False, scale_rew=True, video_d
     env = WarpFrame(env)
     if stack:
         env = FrameStack(env, 4)
+    env = ShortLife(env)
     return env
 
 
@@ -88,4 +93,31 @@ class AllowBacktracking(gym.Wrapper):
         self._cur_x += rew
         rew = max(0, self._cur_x - self._max_x)
         self._max_x = max(self._max_x, self._cur_x)
+        return obs, rew, done, info
+
+class ShortLife(gym.Wrapper):
+    def __init__(self, env):
+        super(ShortLife, self).__init__(env)
+        self.steps_done = 0
+        self.max_steps = 50
+        self.death_count = 0
+        self.curr_run_reward = 0
+
+    def reset(self, **kwargs):  # pylint: disable=E0202
+        self.steps_done = 0
+        self.curr_run_reward = 0
+        return self.env.reset(**kwargs)
+
+    def step(self, action):  # pylint: disable=E0202
+        obs, rew, done, info = self.env.step(action)
+        self.curr_run_reward += rew
+        self.steps_done += 1
+        if self.steps_done == self.max_steps:
+            self.death_count += int(floor(self.curr_run_reward))
+            # increment = int(floor(self.curr_run_reward)) + self.death_count + 15
+            random_max_step = randrange(self.death_count, self.death_count + 200)
+            print(self.death_count, random_max_step)
+            self.max_steps = min(random_max_step, 4500)
+            self.reset()
+            done = True
         return obs, rew, done, info
