@@ -60,7 +60,7 @@ class Agents:
             self.viz = Visdom(port=self.args.port)
             self.win = None
 
-        self.envs = [make_env(self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, game, level)
+        self.envs = [make_env(self.args.game, self.args.level, self.args.env_name, self.args.seed, i, self.args.log_dir, self.args.add_timestep, self.args.remote_env, self.args.record)
                      for i in range(self.args.num_processes)]
 
         if self.args.num_processes > 1:

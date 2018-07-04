@@ -1,4 +1,5 @@
 # It's dangerous to run alone, take these
+- `python main.py --env-name Sonic-v0MultipleShort --num-steps 20 --num-processes 32 --algo acktr`
 - `python main.py --env-name "Sonic-v02" --algo acktr --num-processes 32 --num-steps 20`
 - `python enjoy.py --load-dir trained_models/acktr --env-name "Sonic-v02" --num-stack 4`
 

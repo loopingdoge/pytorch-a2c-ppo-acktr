@@ -71,7 +71,7 @@ train_set = [("SonicTheHedgehog-Genesis", "SpringYardZone.Act3"),
              ("SonicAndKnuckles3-Genesis", "AngelIslandZone.Act1"),
 ]
 
-shuffle(train_set)
+# shuffle(train_set)
 
 
 def multiple_agents(train_set):
