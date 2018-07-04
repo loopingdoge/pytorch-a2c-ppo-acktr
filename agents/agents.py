@@ -254,8 +254,8 @@ class Agents:
                 y_vals = np.append(y_vals, [final_rewards.mean()])
 
                 opts = dict(
-                    width=640,
-                    height=450,
+                    width=400,
+                    height=300,
                     xlabel='Timesteps',
                     ylabel='Score',
                     title=plot_title,
