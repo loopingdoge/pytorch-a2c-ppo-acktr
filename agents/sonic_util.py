@@ -116,7 +116,6 @@ class ShortLife(gym.Wrapper):
             self.death_count += int(floor(self.curr_run_reward))
             # increment = int(floor(self.curr_run_reward)) + self.death_count + 15
             random_max_step = randrange(self.death_count, self.death_count + 200)
-            print(self.death_count, random_max_step)
             self.max_steps = min(random_max_step, 4500)
             self.reset()
             done = True
