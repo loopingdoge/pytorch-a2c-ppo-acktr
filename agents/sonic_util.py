@@ -99,7 +99,7 @@ class ShortLife(gym.Wrapper):
     def __init__(self, env):
         super(ShortLife, self).__init__(env)
         self.steps_done = 0
-        self.max_steps = 50
+        self.max_steps = 150
         self.death_count = 0
         self.curr_run_reward = 0
 
@@ -113,10 +113,8 @@ class ShortLife(gym.Wrapper):
         self.curr_run_reward += rew
         self.steps_done += 1
         if self.steps_done == self.max_steps:
-            self.death_count += int(floor(self.curr_run_reward))
-            # increment = int(floor(self.curr_run_reward)) + self.death_count + 15
-            random_max_step = randrange(self.death_count, self.death_count + 200)
-            self.max_steps = min(random_max_step, 4500)
+            self.death_count += 1
+            self.max_steps += 15 + int(self.curr_run_reward / 2)
             self.reset()
             done = True
         return obs, rew, done, info
